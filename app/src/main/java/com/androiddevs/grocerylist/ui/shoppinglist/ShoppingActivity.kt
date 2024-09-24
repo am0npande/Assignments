@@ -4,12 +4,10 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.androiddevs.grocerylist.R
-import com.androiddevs.grocerylist.other.ShoppingItemAdapter
 import com.androiddevs.grocerylist.data.db.entities.ShoppingItem
-import kotlinx.android.synthetic.main.activity_shopping.*
+import com.androiddevs.grocerylist.databinding.ActivityShoppingBinding
+import com.androiddevs.grocerylist.other.ShoppingItemAdapter
 import org.kodein.di.KodeinAware
 import org.kodein.di.android.kodein
 import org.kodein.di.generic.instance
@@ -20,24 +18,30 @@ class ShoppingActivity : AppCompatActivity(), KodeinAware {
     private val factory: ShoppingViewModelFactory by instance()
 
     lateinit var viewModel: ShoppingViewModel
+    private lateinit var binding: ActivityShoppingBinding  // Binding object
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_shopping)
+
+        // Initialize the binding object
+        binding = ActivityShoppingBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         viewModel = ViewModelProvider(this, factory).get(ShoppingViewModel::class.java)
 
         val adapter = ShoppingItemAdapter(listOf(), viewModel)
 
-        rvShoppingItems.layoutManager = LinearLayoutManager(this)
-        rvShoppingItems.adapter = adapter
+        // Access RecyclerView and FloatingActionButton via binding object
+        binding.rvShoppingItems.layoutManager = LinearLayoutManager(this)
+        binding.rvShoppingItems.adapter = adapter
 
         viewModel.getAllShoppingItems().observe(this, Observer {
             adapter.items = it
             adapter.notifyDataSetChanged()
         })
 
-        fab.setOnClickListener {
+        // Handle FAB click
+        binding.fab.setOnClickListener {
             AddShoppingItemDialog(
                 this,
                 object : AddDialogListener {
@@ -47,5 +51,4 @@ class ShoppingActivity : AppCompatActivity(), KodeinAware {
                 }).show()
         }
     }
-
 }
